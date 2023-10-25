@@ -1,0 +1,41 @@
+{% extends 'limpiados.html' %}
+
+
+{% block content %}
+    
+<div class="container text-center">
+    <h1 >Registros por Mes</h1>
+    <br>
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Contraparte</th> 
+                <th>Año</th>
+                <th>Mes</th>
+                <th>Cantidad de Registros</th>
+                <th>Descargar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mes_registro in meses_y_nombres %}
+            <tr>
+                <td>{{ mes_registro.tipo_contraparte }}</td> 
+                <td>{{ mes_registro.ano }}</td>
+                <td>{{ mes_registro.nombre_mes }}</td>
+                <td>{{ mes_registro.cantidad_registros }}</td>
+                <td>
+                    {% if mes_registro.nombre_archivo %}
+                        <a href="{% url 'descargar_archivo' ano=mes_registro.ano mes=mes_registro.mes %}" class="btn btn-primary">Descargar</a>
+                    {% else %}
+                        <span class="text-warning">Archivo no disponible</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+{% endblock %}
