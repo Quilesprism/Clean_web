@@ -14,6 +14,7 @@
                 <th>Mes</th>
                 <th>Cantidad de Registros</th>
                 <th>Descargar</th>
+                <th>Alarmas</th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +27,13 @@
                 <td>
                     {% if mes_registro.nombre_archivo %}
                         <a href="{% url 'descargar_archivo' ano=mes_registro.ano mes=mes_registro.mes %}" class="btn btn-primary">Descargar</a>
+                    {% else %}
+                        <span class="text-warning">Archivo no disponible</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if mes_registro.nombre_alarmas %}
+                        <a href="{% url 'descargar_alarma' ano=mes_registro.ano mes=mes_registro.mes %}" class="btn btn-primary">Descargar</a>
                     {% else %}
                         <span class="text-warning">Archivo no disponible</span>
                     {% endif %}

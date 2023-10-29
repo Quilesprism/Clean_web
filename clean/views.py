@@ -1,34 +1,16 @@
 
-from django.shortcuts import redirect, render
+from django.http import JsonResponse
+from django.shortcuts import render
 import pandas as pd
-from clean.models import DatosLimpios
+from clean.models import Clientes
 from . import limpieza
 import os
 from django.utils import timezone
-import os
-import pandas as pd
-from django.utils import timezone
-from .models import DatosLimpios
 from datetime import datetime
 from django.contrib import messages 
+from .guardarbd import guardarbd_proveedores, guardarCliente
+from .alarmas import guardar_alarmas_y_promedio
 
-
-def guardarbd(df_limpiado, ano_subida, mes_subida, nombre_archivo):
-    for index, row in df_limpiado.iterrows():
-        datos_limpios = DatosLimpios(
-            fecha_transaccion=row['FECHATRANSACCIÓN'],
-            nit=row['Nit'],
-            nombre=row['Nombre'],
-            ciiu=row['CIIU'],
-            valor_transaccion=row['ValordelaTransacción'],
-            ciudad=row['IDCIUDAD'],
-            departamento=row['IDDEPTO'],
-            ano=ano_subida,  
-            mes=mes_subida,
-            nombre_archivo= nombre_archivo
-        )
-        datos_limpios.save()
-        
 def cargar_archivo(request):
     if request.method == 'POST':
         archivo = request.FILES.get('archivo')
@@ -58,7 +40,9 @@ def procesar_cliente(request):
         df = pd.read_excel(archivo)
         df_limpiado = limpieza.limpiar_dataframe(df)
         fecha_subida = request.POST.get('fecha')
+        nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)
 
+        
         if not fecha_subida:
             messages.error(request, 'La fecha ingresada no es válida.')
             return render(request, 'cargar_archivo.html')
@@ -67,11 +51,12 @@ def procesar_cliente(request):
         ano_subida = fecha_subida.year
         mes_subida = fecha_subida.month
 
-        if not DatosLimpios.objects.filter(mes=mes_subida).exists():
+        if not Clientes.objects.filter(mes=mes_subida).exists():
             fecha_actual = timezone.now()
             nombre_archivo = f'Archivo_limpio_{fecha_actual.strftime("%Y%m%d%H%M%S")}.xlsx'
             directorio_archivos = os.path.abspath('archivos_cargados')
-            guardarbd(df_limpiado, ano_subida, mes_subida, nombre_archivo)
+            
+            guardarCliente(df_limpiado, ano_subida, mes_subida, nombre_archivo, nombre_alarmas)
             
             if not os.path.exists(directorio_archivos):
                 os.makedirs(directorio_archivos)
@@ -84,7 +69,6 @@ def procesar_cliente(request):
         messages.error(request, f'Error al procesar el archivo: {str(e)}')
     
     return render(request, 'cargar_archivo.html')
-
 
 
 def procesar_proveedor(request):
