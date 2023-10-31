@@ -27,6 +27,8 @@ class Clientes(models.Model):
         verbose_name_plural = "Cliente_Limpios"
     
 
+
+
 class Proveedores(models.Model):
     fecha_transaccion = models.DateField()
     nit = models.CharField(max_length=20)

@@ -39,9 +39,10 @@ def procesar_cliente(request):
         
         df = pd.read_excel(archivo)
         df_limpiado = limpieza.limpiar_dataframe(df)
+        print(df.head())
         fecha_subida = request.POST.get('fecha')
         nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)
-
+        
         
         if not fecha_subida:
             messages.error(request, 'La fecha ingresada no es válida.')

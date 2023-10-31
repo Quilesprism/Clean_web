@@ -1,6 +1,11 @@
 from .models import Clientes, Proveedores
 
+from django.db import transaction
+import pandas as pd
+
+@transaction.atomic
 def guardarCliente(df_limpiado, ano_subida, mes_subida, nombre_archivo, nombre_alarmas):
+    clientes = []
     for index, row in df_limpiado.iterrows():
         cliente = Clientes(
             fecha_transaccion=row['FECHA TRANSACCION'],
@@ -19,9 +24,12 @@ def guardarCliente(df_limpiado, ano_subida, mes_subida, nombre_archivo, nombre_a
             ano=ano_subida,
             mes=mes_subida,
             nombre_archivo=nombre_archivo,
-            alarmas= nombre_alarmas
+            alarmas=nombre_alarmas
         )
-        cliente.save()
+        clientes.append(cliente)
+
+    Clientes.objects.bulk_create(clientes)
+
 
 def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo):
     for index, row in df_limpiado.iterrows():

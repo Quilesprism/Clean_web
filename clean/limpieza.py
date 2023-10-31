@@ -25,14 +25,26 @@ def limpiar_dataframe(df):
             if pd.isna(date):
                 _, last_day_of_month = calendar.monthrange(mode_year, mode_month)
                 df.loc[i, 'FECHA TRANSACCION'] = datetime(mode_year, mode_month, last_day_of_month)
+                
+        def limpiar_columna(col):
+            if isinstance(col, str) == ' ' or pd.isnull(col) or col == 'N/A':
+                return "NOMBRE_EMPRESA"
+            else:
+                return col
+        df['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'] = df['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'].apply(limpiar_columna)
+        
         columnas_a_limpiar = ['NOMBRE', 'NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA', 'PAIS', 'CIUDAD', 'DEPARTAMENTO']
+        
         df[columnas_a_limpiar] = df[columnas_a_limpiar].apply(lambda col: col.str.replace('[Ññ]', '|', regex=True))
+        
         def limpiar_centro(centro):
             if isinstance(centro, str) == ' ' or pd.isnull(centro) or centro == 'N/A':
                 return 1000
             else:
                 return centro
+            
         df['ID CENTRO COSTOS'] = df['ID CENTRO COSTOS'].apply(limpiar_centro)
+        
         def limpiar_nombre(nombre):
             if isinstance(nombre, str):
                 nombre = unidecode.unidecode(nombre)
@@ -50,15 +62,6 @@ def limpiar_dataframe(df):
             return row
         df = df.apply(aplicar_regla_pais, axis=1)
         df['Concatenado'] = df['DEPARTAMENTO'].astype(str) + df['CIUDAD'].astype(str)
-
-        # df_generales['Concatenado'] = df_generales['Departamento'].astype(str) + df_generales['Municipio'].astype(str)
-        # ciudades_cliente = df['CIUDAD'].unique()
-        # for ciudad in ciudades_cliente:
-        #     departamento_correspondiente = df_generales[df_generales['Municipio'] == ciudad]['Departamento'].values
-        #     if len(departamento_correspondiente) > 0:
-        #         df.loc[df['CIUDAD'] == ciudad, 'SinCorr_Ciudad'] = departamento_correspondiente[0]
-        # df['SinCorrespondencia'] = df['Concatenado'].apply(lambda x: 0 if x in df_generales['Concatenado'].values else 1)
-
         def limpiar_nit(nit):
             nit = str(nit)
             nit = re.sub('[^0-9-]', '', nit)  
@@ -82,30 +85,17 @@ def limpiar_dataframe(df):
                 elif primer_digito <= 7:
                     return 'NATURAL'
             except (ValueError, TypeError) as e:
-                tipo_error = type(e).__name__
+                tipo_error = type(e)._name_
                 mensaje_error = str(e)
                 registrar_error('No. DOCUMENTO DE IDENTIDAD', tipo_error)
-                enviar_correo_electronico(f"Error al limpiar el DataFrame: {mensaje_error}")
+                #enviar_correo_electronico(f"Error al limpiar el DataFrame: {mensaje_error}")
 
         # Aplica la función a la columna 'No. DOCUMENTO DE IDENTIDAD' y asigna los resultados a la columna 'TIPO PERSONA'
-        df['TIPO PERSONA'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(determinar_tipo_persona)
+        df['TIPO PERSONA'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(lambda x: x if x in ['NATURAL', 'JURIDICA'] else determinar_tipo_persona(x))
 
         df['MEDIO PAGO'] = df['MEDIO PAGO'].apply(lambda x: 'TRANSFERENCIA' if pd.isna(x) or (x != 'EFECTIVO' and x.strip().upper() != 'EFECTIVO') else 'EFECTIVO')
 
-        # Calcular el promedio del VALOR DE LA TRANSACCION por No. DOCUMENTO DE IDENTIDAD
-        df['PROMEDIO'] = df.groupby('No. DOCUMENTO DE IDENTIDAD')['VALOR DE LA TRANSACCION'].transform('mean')
-
-        # Crear la columna ALARMAS con valores por defecto NORMAL
-        df['ALARMAS'] = 'USUAL'
-
-        # Cambiar a INUSUAL si alguna transacción es al menos cinco veces mayor al promedio
-        df.loc[df['VALOR DE LA TRANSACCION'] >= 5 * df['PROMEDIO'], 'ALARMAS'] = 'INUSUAL'
-
-        # Cambiar a SOSPECHOSA si además la transacción se realizó con MEDIO PAGO EFECTIVO
-        df.loc[(df['ALARMAS'] == 'INUSUAL') & (df['MEDIO PAGO'] == 'EFECTIVO'), 'ALARMAS'] = 'SOSPECHOSA'
-        
-        #cambiar a sospechoso si la transacción es mayor a 10 millones
-        df.loc[df['VALOR DE LA TRANSACCION'] > 10000000, 'ALARMAS'] = 'SOSPECHOSA'
+       
 
         return df
 
@@ -141,7 +131,7 @@ def enviar_correo_electronico(mensaje):
 
 
 
-# df=pd.read_excel('C:/Users/quile/Downloads/CLIENTES_MODELO.xlsx')
+# df=pd.read_excel('C:/Users/quile/Downloads/CLIENTES_.xlsx')
 
 # limpiar_dataframe(df)
 
