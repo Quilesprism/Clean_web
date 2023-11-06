@@ -24,20 +24,23 @@ def guardarCliente(df_limpiado, ano_subida, mes_subida, nombre_archivo, nombre_a
             ano=ano_subida,
             mes=mes_subida,
             nombre_archivo=nombre_archivo,
-            alarmas=nombre_alarmas
+            alarmas=nombre_alarmas,
+            contraparte= 'Cliente'
         )
         clientes.append(cliente)
 
     Clientes.objects.bulk_create(clientes)
 
-
-def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo):
+@transaction.atomic
+def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo, nombre_alarmas):
+    proveedores=[]
     for index, row in df_limpiado.iterrows():
         proveedor = Proveedores(
             fecha_transaccion=row['FECHA TRANSACCION'],
             nit=row['No. DOCUMENTO DE IDENTIDAD'],
             nombre=row['NOMBRE'],
             ciiu=row['CIIU'],
+            detalle=row['DETALLE TRANSACCION'],
             valor_transaccion=row['VALOR DE LA TRANSACCION'],
             pais=row['PAIS'],
             ciudad=row['CIUDAD'],
@@ -45,8 +48,10 @@ def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo):
             ano=ano_subida,
             mes=mes_subida,
             nombre_archivo=nombre_archivo,
-            funcionario=row['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'],
             tipo_de_persona=row['TIPO PERSONA'],
-            medio_de_pago=row['MEDIO PAGO']
+            medio_de_pago=row['MEDIO PAGO'],
+            alarmas=nombre_alarmas,
+            contraparte= 'Proveedor'
         )
-        proveedor.save()
+        proveedores.append(proveedor)
+    Proveedores.objects.bulk_create(proveedores)

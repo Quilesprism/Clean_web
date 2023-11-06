@@ -26,14 +26,14 @@
                 <td>{{ mes_registro.cantidad_registros }}</td>
                 <td>
                     {% if mes_registro.nombre_archivo %}
-                        <a href="{% url 'descargar_archivo' ano=mes_registro.ano mes=mes_registro.mes %}" class="btn btn-primary">Descargar</a>
+                        <a href="{% url 'descargar_archivo' ano=mes_registro.ano mes=mes_registro.mes contraparte=mes_registro.tipo_contraparte %}" class="btn btn-primary">Descargar</a>
                     {% else %}
                         <span class="text-warning">Archivo no disponible</span>
                     {% endif %}
                 </td>
                 <td>
                     {% if mes_registro.nombre_alarmas %}
-                        <a href="{% url 'descargar_alarma' ano=mes_registro.ano mes=mes_registro.mes %}" class="btn btn-primary">Descargar</a>
+                        <a href="{% url 'descargar_alarma' ano=mes_registro.ano mes=mes_registro.mes contraparte=mes_registro.tipo_contraparte %}" class="btn btn-primary">Descargar</a>
                     {% else %}
                         <span class="text-warning">Archivo no disponible</span>
                     {% endif %}
