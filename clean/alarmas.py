@@ -47,7 +47,7 @@ def guardar_alarmasP(df):
     df.loc[(df['ALARMAS'] == 'INUSUAL') & (df['MEDIO PAGO'] == 'EFECTIVO'), 'ALARMAS'] = 'SOSPECHOSA'    
     df.loc[df['VALOR DE LA TRANSACCION'] > 10000000, 'ALARMAS'] = 'SOSPECHOSA'
     carpeta = 'alarmas'
-    columnas_deseadas = ['No. DOCUMENTO DE IDENTIDAD', 'NOMBRE', 'VALOR DE LA TRANSACCION', 'PROMEDIO', 'MEDIO PAGO', 'TIPO PERSONA (natural/jurídica)', 'ALARMAS']
+    columnas_deseadas = ['FECHA TRANSACCION', 'No. DOCUMENTO DE IDENTIDAD', 'NOMBRE', 'VALOR DE LA TRANSACCION', 'PROMEDIO', 'MEDIO PAGO', 'TIPO PERSONA (natural/jurídica)', 'ALARMAS']
     df_filtrado = df[df['ALARMAS'].isin(['INUSUAL', 'SOSPECHOSA'])]
     df_filtrado = df_filtrado[columnas_deseadas]
     fecha_actual = timezone.now()
