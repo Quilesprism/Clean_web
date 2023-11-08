@@ -223,9 +223,5 @@ def enviar_correo_electronico(mensaje):
 
 
 
-# df=pd.read_excel('C:/Users/quile/Downloads/PROVEEDORES ENERO 2023.xlsx')
-
-# limpiar_Proveedor(df)
-
-# df.to_excel('excel.xlsx')
+# df=pd.read_excel('C:/Users/quile/Downloads/GENERALES.xlsx')   
 
