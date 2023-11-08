@@ -1,5 +1,3 @@
-
-from django.http import JsonResponse
 from django.shortcuts import render
 import pandas as pd
 from clean.models import Clientes, Proveedores
@@ -61,7 +59,8 @@ def procesar_cliente(request):
                     # El archivo cumple con los requisitos
                 df_limpiado = limpieza.limpiar_dataframe(df)
                 fecha_subida = request.POST.get('fecha')
-                nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)                
+                nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)  
+                           
                 if not fecha_subida:
                     messages.error(request, 'La fecha ingresada no es válida.')
                     return render(request, 'cargar_archivo.html')
@@ -112,6 +111,11 @@ def procesar_proveedor(request):
     try:
         archivo = request.FILES.get('archivo')
         df = pd.read_excel(archivo)
+        # resultado = cargar('C:/Users/quile/Downloads/GENERALES.xlsx')
+        # if resultado is True:
+        #      print("Datos cargados con éxito.")
+        # else:
+        #      print(f"Error al cargar datos: {resultado}")
         columnas_archivo = df.columns.tolist()
         mismo_orden = columnas_requeridas == columnas_archivo
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)

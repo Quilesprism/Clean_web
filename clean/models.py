@@ -58,3 +58,13 @@ class Proveedores(models.Model):
         verbose_name = "P_limpio"
         verbose_name_plural = "P_Limpios"
 
+class Generales (models.Model):
+    departamento = models.CharField(max_length=255)
+    municipio= models.CharField(max_length=255)
+    divipola= models.CharField(max_length=255)
+    categoria= models.CharField(max_length=255)
+    valor_riesgo= models.IntegerField(blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "general"
+        verbose_name_plural = "generales"
