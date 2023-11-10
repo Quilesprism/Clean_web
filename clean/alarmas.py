@@ -1,6 +1,7 @@
 from django.utils import timezone
 import os
 from django.core.mail import EmailMessage
+from matplotlib import pyplot as plt
 
 def enviar_correo_electronico(mensaje, archivo_adjunto):
     subject = 'Archivo de Alarmas'
@@ -11,7 +12,21 @@ def enviar_correo_electronico(mensaje, archivo_adjunto):
         email.attach(os.path.basename(archivo_adjunto), file.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     email.send()
+def enviar_correo_electronico_con_imagen(mensaje, imagen_adjunta):
+    subject = 'Archivo de Alarmas'
+    from_email = 'quilesxasterin8@gmail.com'
+    recipient_list = ['quilesxasterin8@gmail.com']
+    # Renderizar el cuerpo del correo electrónico usando un template si es necesario
+    
+    email = EmailMessage(subject, mensaje, from_email, recipient_list)
+    # Adjuntar la imagen
+    with open(imagen_adjunta, 'rb') as file:
+        email.attach_file(imagen_adjunta, mimetype='image/png')  # Ajusta el mimetype según el tipo de imagen
 
+    # Puedes agregar más adjuntos si es necesario
+    # email.attach_file(otro_adjunto, mimetype='application/pdf')
+
+    email.send()
 
 def guardar_alarmas_y_promedio(df):
     # Calcular el promedio del VALOR DE LA TRANSACCION por No. DOCUMENTO DE IDENTIDAD
@@ -28,6 +43,22 @@ def guardar_alarmas_y_promedio(df):
     columnas_deseadas = ['No. DOCUMENTO DE IDENTIDAD', 'NOMBRE', 'VALOR DE LA TRANSACCION', 'MEDIO PAGO', 'TIPO PERSONA (natural/jurídica)', 'CANAL DE DISTRIBUCION', 'ALARMAS']
     df_filtrado = df[df['ALARMAS'].isin(['INUSUAL', 'SOSPECHOSA'])]
     df_filtrado = df_filtrado[columnas_deseadas]
+    counts = df['ALARMAS'].value_counts()
+    labels = counts.index
+    plt.pie(counts, labels=labels, autopct='%1.1f%%', startangle=90)
+    plt.title('Distribución de Alarmas')
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Guardar la gráfica en una imagen
+    carpeta_graficas = 'graficas'
+    if not os.path.exists(carpeta_graficas):
+        os.makedirs(carpeta_graficas)
+    ruta_grafica = os.path.join(carpeta_graficas, 'Distribucion_Alarmas.png')
+    plt.savefig(ruta_grafica)
+    plt.close()
+
+    # Llamar a la función de correo electrónico con la ruta de la imagen
+    enviar_correo_electronico('Mensaje de la alarma', ruta_grafica)
     fecha_actual = timezone.now()
     nombre_archivo = f'Alarmas_{fecha_actual.strftime("%Y%m%d%H%M%S")}.xlsx'
     if not os.path.exists(carpeta):

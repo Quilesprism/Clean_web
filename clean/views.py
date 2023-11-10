@@ -9,6 +9,8 @@ from django.contrib import messages
 from .guardarbd import guardarbd_proveedores, guardarCliente
 from .alarmas import guardar_alarmas_y_promedio, guardar_alarmasP
 
+
+
 def cargar_archivo(request):
     if request.method == 'POST':
         archivo = request.FILES.get('archivo')
@@ -56,7 +58,7 @@ def procesar_cliente(request):
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)
 
         if mismo_orden and todas_las_columnas_presentes:
-                    # El archivo cumple con los requisitos
+                
                 df_limpiado = limpieza.limpiar_dataframe(df)
                 fecha_subida = request.POST.get('fecha')
                 nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)  
