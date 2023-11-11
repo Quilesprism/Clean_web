@@ -39,9 +39,7 @@ def guardar_alarmas_y_promedio(df):
     labels = counts.index
     plt.pie(counts, labels=labels, autopct='%1.1f%%', startangle=90)
     plt.title('Distribución de Alarmas')
-    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
-    # Guardar la gráfica en una imagen
+    plt.axis('equal') 
     carpeta_graficas = 'graficas'
     if not os.path.exists(carpeta_graficas):
         os.makedirs(carpeta_graficas)
