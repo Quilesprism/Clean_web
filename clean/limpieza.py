@@ -84,19 +84,19 @@ def limpiar_dataframe(df):
             # Crea la columna 'Concatenado' en el DataFrame del cliente
         df['Concatenado'] = df['DEPARTAMENTO'].astype(str) + df['CIUDAD'].astype(str)
 
-        # Realiza una consulta a la tabla Generales para obtener la información necesaria
-        for index, row in df.iterrows():
-             ciudad = row['CIUDAD']
-             departamento_correspondiente = Generales.objects.filter(Municipio=ciudad).values('Departamento').first()
+        # # Realiza una consulta a la tabla Generales para obtener la información necesaria
+        # for index, row in df.iterrows():
+        #      ciudad = row['CIUDAD']
+        #      departamento_correspondiente = Generales.objects.filter(Municipio=ciudad).values('Departamento').first()
 
-             if departamento_correspondiente:
-                 df.at[index, 'SinCorr_Ciudad'] = departamento_correspondiente['Departamento']
+        #      if departamento_correspondiente:
+        #          df.at[index, 'SinCorr_Ciudad'] = departamento_correspondiente['Departamento']
 
-        # # Aplica la función lambda para determinar si hay correspondencia
-        df['SinCorrespondencia'] = df['Concatenado'].apply(
-            lambda x: 0 if Generales.objects.filter(Concatenado=x).exists() else 1
-         )
-        df['Concatenado'] = df['DEPARTAMENTO'].astype(str) + df['CIUDAD'].astype(str)
+        # # # Aplica la función lambda para determinar si hay correspondencia
+        # df['SinCorrespondencia'] = df['Concatenado'].apply(
+        #     lambda x: 0 if Generales.objects.filter(Concatenado=x).exists() else 1
+        #  )
+        # df['Concatenado'] = df['DEPARTAMENTO'].astype(str) + df['CIUDAD'].astype(str)
         def limpiar_nit(nit):
             nit = str(nit)
             nit = re.sub('[^0-9-]', '', nit)  
