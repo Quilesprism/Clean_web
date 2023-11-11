@@ -135,7 +135,7 @@ def procesar_proveedor(request):
                 ano_subida = fecha_subida.year
                 mes_subida = fecha_subida.month
 
-                if not Clientes.objects.filter(mes=mes_subida).exists():
+                if not Proveedores.objects.filter(mes=mes_subida).exists():
                     fecha_actual = timezone.now()
                     nombre_archivo = f'Archivo_limpio_{fecha_actual.strftime("%Y%m%d%H%M%S")}.xlsx'
                     directorio_archivos = os.path.abspath('archivos_cargados')
