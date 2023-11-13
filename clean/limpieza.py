@@ -1,34 +1,17 @@
-import os
+
+
 import pandas as pd
 import calendar
 import re
 from datetime import datetime
 import unidecode
 from django.core.mail import send_mail
+import os
 
-from clean.models import Generales
-
-
-# def asignar_departamento(df_cliente):
-#     # Crea la columna 'Concatenado' en el DataFrame del cliente
-#     df_cliente['Concatenado'] = df_cliente['DEPARTAMENTO'].astype(str) + df_cliente['CIUDAD'].astype(str)
-
-#     # Realiza una consulta a la tabla Generales para obtener la información necesaria
-#     for index, row in df_cliente.iterrows():
-#         ciudad = row['CIUDAD']
-#         departamento_correspondiente = Generales.objects.filter(Municipio=ciudad).values('Departamento').first()
-
-#         if departamento_correspondiente:
-#             df_cliente.at[index, 'SinCorr_Ciudad'] = departamento_correspondiente['Departamento']
-
-#     # Aplica la función lambda para determinar si hay correspondencia
-#     df_cliente['SinCorrespondencia'] = df_cliente['Concatenado'].apply(
-#         lambda x: 0 if Generales.objects.filter(Concatenado=x).exists() else 1
-#     )
-
-def limpiar_dataframe(df):
+def limpiar_dataframe(df, df_gen):
     errores = {}  
     try:
+        print(df_gen.head())
         def registrar_error(columna, tipo_error):
             if columna in errores:
                 if tipo_error in errores[columna]:
@@ -83,20 +66,15 @@ def limpiar_dataframe(df):
         df = df.apply(aplicar_regla_pais, axis=1)
             # Crea la columna 'Concatenado' en el DataFrame del cliente
         df['Concatenado'] = df['DEPARTAMENTO'].astype(str) + df['CIUDAD'].astype(str)
+        # df_gen['Concatenado'] = df_gen['Departamento'].astype(str) + df_gen['Municipio'].astype(str)
 
-        # # Realiza una consulta a la tabla Generales para obtener la información necesaria
-        # for index, row in df.iterrows():
-        #      ciudad = row['CIUDAD']
-        #      departamento_correspondiente = Generales.objects.filter(Municipio=ciudad).values('Departamento').first()
+        # ciudades_cliente = df['CIUDAD'].unique()
+        # for ciudad in ciudades_cliente:
+        #     departamento_correspondiente = df_gen[df_gen['Municipio'] == ciudad]['Departamento'].values
+        #     if len(departamento_correspondiente) > 0:
+        #         df.loc[df['CIUDAD'] == ciudad, 'SinCorr_Ciudad'] = departamento_correspondiente[0]
 
-        #      if departamento_correspondiente:
-        #          df.at[index, 'SinCorr_Ciudad'] = departamento_correspondiente['Departamento']
-
-        # # # Aplica la función lambda para determinar si hay correspondencia
-        # df['SinCorrespondencia'] = df['Concatenado'].apply(
-        #     lambda x: 0 if Generales.objects.filter(Concatenado=x).exists() else 1
-        #  )
-        # df['Concatenado'] = df['DEPARTAMENTO'].astype(str) + df['CIUDAD'].astype(str)
+        # df['SinCorrespondencia'] = df['Concatenado'].apply(lambda x: 0 if x in df_gen['Concatenado'].values else 1)
         def limpiar_nit(nit):
             nit = str(nit)
             nit = re.sub('[^0-9-]', '', nit)  
@@ -257,9 +235,10 @@ def enviar_correo_electronico(mensaje):
     send_mail(subject, message, from_email, recipient_list)
 
 
+# df_gen = pd.read_excel('D:/descargas/GENERALES.xlsx')
 
-# df=pd.read_excel('C:/Users/quile/Downloads/CLIENTES_.xlsx')
+# df=pd.read_excel('D:/descargas/CLIENTES_.xlsx')
 
-# limpiar_dataframe(df)
+# limpiar_dataframe(df, df_gen)
 
 # df.to_excel('fin', index=False)

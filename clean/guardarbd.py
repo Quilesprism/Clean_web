@@ -56,23 +56,23 @@ def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo, n
         proveedores.append(proveedor)
     Proveedores.objects.bulk_create(proveedores)
 
-
+@transaction.atomic
 def cargar(file_path):
     try:
-          # Lee el archivo Excel en un DataFrame
-        df = pd.read_excel(file_path)
 
-          # Itera sobre las filas del DataFrame y crea instancias del modelo
-        for _, row in df.iterrows():
+        df = pd.read_excel(file_path)
+        generales=[]
+        for index, row in df.iterrows():
               instancia_modelo = Generales(
                 departamento=row['Departamento'],
                  municipio=row['Municipio'],
                  divipola=row['Divipola'],
                  categoria=row['Categoria'],
                  valor_riesgo=row['VALOR-RIESGO']
-             )
-        instancia_modelo.save()  # Guarda la instancia en la base de datos
-
-        return True  # Si la carga es exitosa
+            )
+              generales.append(instancia_modelo) 
+        
+        Generales.objects.bulk_create(generales)
+        return True
     except Exception as e:
         return str(e)

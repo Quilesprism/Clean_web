@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import pandas as pd
-from clean.models import Clientes, Proveedores
+from clean.models import Clientes, Proveedores, Generales
 from . import limpieza
 import os
 from django.utils import timezone
@@ -8,8 +8,7 @@ from datetime import datetime
 from django.contrib import messages 
 from .guardarbd import guardarbd_proveedores, guardarCliente, cargar
 from .alarmas import guardar_alarmas_y_promedio, guardar_alarmasP
-
-
+from django.db import connection
 
 def cargar_archivo(request):
     if request.method == 'POST':
@@ -50,16 +49,21 @@ def procesar_cliente(request):
         "MEDIO DE VENTA"
     ]
     try:
+      
+        datos_generales = Generales.objects.all()
+        data = list(datos_generales.values())  
         archivo = request.FILES.get('archivo')
         df = pd.read_excel(archivo)
+        
+      
         columnas_archivo = df.columns.tolist()
 
         mismo_orden = columnas_requeridas == columnas_archivo
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)
 
         if mismo_orden and todas_las_columnas_presentes:
-                
-                df_limpiado = limpieza.limpiar_dataframe(df)
+                df_gen = pd.DataFrame(data)
+                df_limpiado = limpieza.limpiar_dataframe(df, df_gen)
                 fecha_subida = request.POST.get('fecha')
                 nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)  
                            
@@ -113,11 +117,11 @@ def procesar_proveedor(request):
     try:
         archivo = request.FILES.get('archivo')
         df = pd.read_excel(archivo)
-        resultado = cargar('C:/Users/quile/Downloads')
-        if resultado is True:
-            print("Datos cargados con éxito.")
-        else:
-            print(f"Error al cargar datos: {resultado}")
+        # resultado = cargar('C:/Users/quile/Downloads/GENERALES.xlsx')
+        # if resultado is True:
+        #     print("Datos cargados con éxito.")
+        # else:
+        #     print(f"Error al cargar datos: {resultado}")
         columnas_archivo = df.columns.tolist()
         mismo_orden = columnas_requeridas == columnas_archivo
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)
