@@ -6,7 +6,7 @@ import os
 from django.utils import timezone
 from datetime import datetime
 from django.contrib import messages 
-from .guardarbd import guardarbd_proveedores, guardarCliente
+from .guardarbd import guardarbd_proveedores, guardarCliente, cargar
 from .alarmas import guardar_alarmas_y_promedio, guardar_alarmasP
 
 
@@ -113,11 +113,11 @@ def procesar_proveedor(request):
     try:
         archivo = request.FILES.get('archivo')
         df = pd.read_excel(archivo)
-        # resultado = cargar('D:/descargas/GENERALES.xlsx')
-        # if resultado is True:
-        #     print("Datos cargados con éxito.")
-        # else:
-        #     print(f"Error al cargar datos: {resultado}")
+        resultado = cargar('C:/Users/quile/Downloads')
+        if resultado is True:
+            print("Datos cargados con éxito.")
+        else:
+            print(f"Error al cargar datos: {resultado}")
         columnas_archivo = df.columns.tolist()
         mismo_orden = columnas_requeridas == columnas_archivo
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)
