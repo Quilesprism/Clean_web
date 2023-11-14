@@ -53,17 +53,14 @@ def procesar_cliente(request):
         datos_generales = Generales.objects.all()
         data = list(datos_generales.values())  
         archivo = request.FILES.get('archivo')
-        df = pd.read_excel(archivo)
-        
-      
+        df = pd.read_excel(archivo)  
         columnas_archivo = df.columns.tolist()
-
         mismo_orden = columnas_requeridas == columnas_archivo
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)
-
         if mismo_orden and todas_las_columnas_presentes:
                 df_gen = pd.DataFrame(data)
                 df_limpiado = limpieza.limpiar_dataframe(df, df_gen)
+                print(df_limpiado.head())
                 fecha_subida = request.POST.get('fecha')
                 nombre_alarmas = guardar_alarmas_y_promedio(df_limpiado)  
                            
