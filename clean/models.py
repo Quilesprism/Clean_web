@@ -28,6 +28,9 @@ class Clientes(models.Model):
     mes = models.IntegerField(blank=True, null=True)
     nombre_archivo = models.CharField(max_length=255, null=True, blank=True)
     alarmas = models.CharField(max_length=255, null=True, blank=True)
+    Concatenado = models.CharField(max_length=255, null=True, blank=True)
+    SinCorr_Ciudad = models.CharField(max_length=255, null=True, blank=True)
+    SinCorrespondencia=models.IntegerField(blank=True, null=True)
     def __str__(self):
         return f'{self.fecha_transaccion} - {self.nombre}'
 
@@ -68,3 +71,17 @@ class Generales (models.Model):
     class Meta:
         verbose_name = "general"
         verbose_name_plural = "generales"
+
+
+# class Usuaio():
+#     id_empresa
+#     nombre
+#     correo
+#     hash
+
+
+
+# class empresa():
+#     nombre
+#     id
+#     correo_oficial_cumplimiento

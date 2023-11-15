@@ -25,6 +25,9 @@ def guardarCliente(df_limpiado, ano_subida, mes_subida, nombre_archivo, nombre_a
             mes=mes_subida,
             nombre_archivo=nombre_archivo,
             alarmas=nombre_alarmas,
+            Concatenado = row['Concatenado'],
+            SinCorr_Ciudad = row['SinCorr_Ciudad'],
+            SinCorrespondencia= row['SinCorrespondencia'],
             contraparte= 'Cliente'
         )
         clientes.append(cliente)
@@ -51,6 +54,7 @@ def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo, n
             tipo_de_persona=row['TIPO PERSONA'],
             medio_de_pago=row['MEDIO PAGO'],
             alarmas=nombre_alarmas,
+            
             contraparte= 'Proveedor'
         )
         proveedores.append(proveedor)

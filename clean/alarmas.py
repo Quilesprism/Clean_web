@@ -47,8 +47,8 @@ def guardar_alarmas_y_promedio(df):
 
     subject = 'Archivo de Alarmas'
     mensaje = 'Adjunto encontrarás el gráfico de las alarmas.'
-    from_email = 'quilesxasterin8@gmail.com'
-    recipient_list = ['quilesxasterin8@gmail.com']
+    from_email = 'notificaciones@riesgos365.com'
+    recipient_list = ['contacto@omenlaceglobal.co']
     email = EmailMessage(subject, mensaje, from_email, recipient_list)
     with open(ruta_grafica, 'rb') as file:
         email.attach('Distribucion_Alarmas.png', file.read(), 'image/png')

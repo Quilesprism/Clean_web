@@ -7,12 +7,8 @@ from datetime import datetime
 import unidecode
 from django.core.mail import send_mail
 import os
-
-def limpiar_dataframe(df, df_gen):
-    errores = {}  
-    try:
-        
-        def registrar_error(columna, tipo_error):
+def registrar_error(columna, tipo_error):
+            errores = {} 
             if columna in errores:
                 if tipo_error in errores[columna]:
                     errores[columna][tipo_error] += 1
@@ -20,86 +16,9 @@ def limpiar_dataframe(df, df_gen):
                     errores[columna][tipo_error] = 1
             else:
                 errores[columna] = {tipo_error: 1}
-        df['FECHA TRANSACCION'] = pd.to_datetime(df['FECHA TRANSACCION'], errors='coerce', dayfirst=True)
-        valid_dates = df.dropna(subset=['FECHA TRANSACCION'])
-        mode_year = valid_dates['FECHA TRANSACCION'].dt.year.mode()[0]
-        mode_month = valid_dates['FECHA TRANSACCION'].dt.month.mode()[0]
-        for i, date in enumerate(df['FECHA TRANSACCION']):
-            if pd.isna(date):
-                _, last_day_of_month = calendar.monthrange(mode_year, mode_month)
-                df.loc[i, 'FECHA TRANSACCION'] = datetime(mode_year, mode_month, last_day_of_month)
-                
-        def limpiar_columna(col):
-            if isinstance(col, str) == ' ' or pd.isnull(col) or col == 'N/A':
-                return "NOMBRE_EMPRESA"
-            else:
-                return col
-        df['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'] = df['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'].apply(limpiar_columna)
-        
-        columnas_a_limpiar = ['NOMBRE', 'NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA', 'PAIS', 'CIUDAD', 'DEPARTAMENTO']
-        
-        df[columnas_a_limpiar] = df[columnas_a_limpiar].apply(lambda col: col.str.replace('[Ññ]', '|', regex=True))
-        
-        def limpiar_centro(centro):
-            if isinstance(centro, str) == ' ' or pd.isnull(centro) or centro == 'N/A':
-                return 1000
-            else:
-                return centro
-            
-        df['ID CENTRO COSTOS'] = df['ID CENTRO COSTOS'].apply(limpiar_centro)
-        
-        def limpiar_nombre(nombre):
-            if isinstance(nombre, str):
-                nombre = unidecode.unidecode(nombre)
-                nombre = re.sub('[^A-Z0-9&| ]+', '', nombre.upper())
-                nombre = nombre.replace('|', 'Ñ')
-                nombre = re.sub(' +', ' ', nombre).strip()
-                return nombre
-            else:
-                return None
-        df[columnas_a_limpiar] = df[columnas_a_limpiar].apply(lambda x: x.map(limpiar_nombre))
-        def aplicar_regla_pais(row):
-            if row['PAIS'] != 'COLOMBIA':
-                row['CIUDAD'] = row['PAIS']
-                row['DEPARTAMENTO'] = 'EXTRANJERO'
-            return row
-        df = df.apply(aplicar_regla_pais, axis=1)
-
-        # Creación de columnas 'Concatenado' en df y df_gen
-        # df['Concatenado'] = df['DEPARTAMENTO'] + '-' + df['CIUDAD']
-        # df_gen['Concatenado'] = df_gen['Departamento'] + '-' + df_gen['Municipio']
-        # # Identificación de ciudades únicas en df
-        # ciudades_cliente = df['CIUDAD'].unique()
-        # # Asignación de correspondencia de departamentos
-        # city_dept_mapping = dict(zip(df_gen['Municipio'], df_gen['Departamento']))
-        # # Asignar los departamentos correspondientes en df utilizando el diccionario
-        # df['SinCorr_Ciudad'] = df['CIUDAD'].map(city_dept_mapping)
-        # # Identificación de correspondencia
-        # def marca_correspondencia(row, df_gen):
-        #     if row['Concatenado'] in df_gen['Concatenado'].values:
-        #         return 0
-        #     else:
-        #         return 1
-        # df['SinCorrespondencia'] = df.apply(marca_correspondencia, args=(df_gen,), axis=1)
-                
-        def limpiar_nit(nit):
-            nit = str(nit)
-            nit = re.sub('[^0-9-]', '', nit)  
-            partes = nit.split('-')
-            if len(partes) > 1 and len(partes[1]) <= 3: 
-                nit = partes[0]  
-            if nit == '':
-                return  
-            return int(nit)  
-        df['No. DOCUMENTO DE IDENTIDAD'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(limpiar_nit)
-        df['CIIU'] = pd.to_numeric(df['CIIU'], errors='coerce')
-        df['CIIU'].fillna(9999, inplace=True)
-        df['CIIU'] = df['CIIU'].astype(int)
-        df['VALOR DE LA TRANSACCION'] = df['VALOR DE LA TRANSACCION'].replace('', 0)
-        def determinar_tipo_persona(nit):
+def determinar_tipo_persona(nit):
             try:
                 primer_digito = int(str(nit)[0])
-
                 if primer_digito > 7:
                     return 'JURIDICA'
                 elif primer_digito <= 7:
@@ -108,13 +27,77 @@ def limpiar_dataframe(df, df_gen):
                 tipo_error = type(e)._name_
                 mensaje_error = str(e)
                 registrar_error('No. DOCUMENTO DE IDENTIDAD', tipo_error)
-                #enviar_correo_electronico(f"Error al limpiar el DataFrame: {mensaje_error}")
-
+def limpiar_columna(col):
+            if isinstance(col, str) == ' ' or pd.isnull(col) or col == 'N/A':
+                return "NOMBRE_EMPRESA"
+            else:
+                return col
+def limpiar_centro(centro):
+            if isinstance(centro, str) == ' ' or pd.isnull(centro) or centro == 'N/A':
+                return 1000
+            else:
+                return centro
+def limpiar_nombre(nombre):
+            if isinstance(nombre, str):
+                nombre = unidecode.unidecode(nombre)
+                nombre = re.sub('[^A-Z0-9&| ]+', '', nombre.upper())
+                nombre = nombre.replace('|', 'Ñ')
+                nombre = re.sub(' +', ' ', nombre).strip()
+                return nombre
+            else:
+                return None
+def aplicar_regla_pais(row):
+            if row['PAIS'] != 'COLOMBIA':
+                row['CIUDAD'] = row['PAIS']
+                row['DEPARTAMENTO'] = 'EXTRANJERO'
+            return row
+def limpiar_nit(nit):
+            nit = str(nit)
+            nit = re.sub('[^0-9-]', '', nit)  
+            partes = nit.split('-')
+            if len(partes) > 1 and len(partes[1]) <= 3: 
+                nit = partes[0]  
+            if nit == '':
+                return  
+            return int(nit)
+def limpiar_dataframe(df, df_gen):
+     
+    try:        
+        df['FECHA TRANSACCION'] = pd.to_datetime(df['FECHA TRANSACCION'], errors='coerce', dayfirst=True)
+        valid_dates = df.dropna(subset=['FECHA TRANSACCION'])
+        mode_year = valid_dates['FECHA TRANSACCION'].dt.year.mode()[0]
+        mode_month = valid_dates['FECHA TRANSACCION'].dt.month.mode()[0]
+        for i, date in enumerate(df['FECHA TRANSACCION']):
+            if pd.isna(date):
+                _, last_day_of_month = calendar.monthrange(mode_year, mode_month)
+                df.loc[i, 'FECHA TRANSACCION'] = datetime(mode_year, mode_month, last_day_of_month)
+        df['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'] = df['NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA'].apply(limpiar_columna)
+        columnas_a_limpiar = ['NOMBRE', 'NOMBRE DEL FUNCIONARIO RESPONSABLE DE LA VENTA', 'PAIS', 'CIUDAD', 'DEPARTAMENTO']
+        df[columnas_a_limpiar] = df[columnas_a_limpiar].apply(lambda col: col.str.replace('[Ññ]', '|', regex=True))         
+        df['ID CENTRO COSTOS'] = df['ID CENTRO COSTOS'].apply(limpiar_centro)   
+        df[columnas_a_limpiar] = df[columnas_a_limpiar].apply(lambda x: x.map(limpiar_nombre))
+        df = df.apply(aplicar_regla_pais, axis=1) 
+        df['No. DOCUMENTO DE IDENTIDAD'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(limpiar_nit)
+        df['CIIU'] = pd.to_numeric(df['CIIU'], errors='coerce')
+        df['CIIU'].fillna(9999, inplace=True)
+        df['CIIU'] = df['CIIU'].astype(int)
+        df['VALOR DE LA TRANSACCION'] = df['VALOR DE LA TRANSACCION'].replace('', 0)
         # Aplica la función a la columna 'No. DOCUMENTO DE IDENTIDAD' y asigna los resultados a la columna 'TIPO PERSONA'
         df['TIPO PERSONA'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(lambda x: x if x in ['NATURAL', 'JURIDICA'] else determinar_tipo_persona(x))
-
         df['MEDIO PAGO'] = df['MEDIO PAGO'].apply(lambda x: 'TRANSFERENCIA' if pd.isna(x) or (x != 'EFECTIVO' and x.strip().upper() != 'EFECTIVO') else 'EFECTIVO')
-        print(df_gen.head())
+    
+        # #Creación de columnas 'Concatenado' en df y df_gen
+        # df['Concatenado'] = df['DEPARTAMENTO'] + '-' + df['CIUDAD']
+        # df_gen['Concatenado'] = df_gen['Departamento'] + '-' + df_gen['Municipio']
+        # ciudades_cliente = df['CIUDAD'].unique()
+        # city_dept_mapping = dict(zip(df_gen['Municipio'], df_gen['Departamento']))
+        # df['SinCorr_Ciudad'] = df['CIUDAD'].map(city_dept_mapping)
+        # df['SinCorrespondencia'] = df.apply(marca_correspondencia, args=(df_gen,), axis=1)
+        # for ciudad in ciudades_cliente:
+        #     departamento_correspondiente = df_gen[df_gen['Municipio'] == ciudad]['Departamento'].values
+        #     if len(departamento_correspondiente) > 0:
+        #         df.loc[df['CIUDAD'] == ciudad, 'SinCorr_Ciudad'] = departamento_correspondiente[0]
+        # df['SinCorrespondencia'] = df['Concatenado'].apply(lambda x: 0 if x in df_gen['Concatenado'].values else 1)
         return df
 
     except Exception as e:
@@ -207,7 +190,7 @@ def limpiar_Proveedor(df):
         # Aplica la función a la columna 'No. DOCUMENTO DE IDENTIDAD' y asigna los resultados a la columna 'TIPO PERSONA'
         df['TIPO PERSONA'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(lambda x: x if x in ['NATURAL', 'JURIDICA'] else determinar_tipo_persona(x))
         df['MEDIO PAGO'] = df['MEDIO PAGO'].apply(lambda x: 'TRANSFERENCIA' if pd.isna(x) or (x != 'EFECTIVO' and x.strip().upper() != 'EFECTIVO') else 'EFECTIVO')
-        print(df.head())
+
         return df
 
     except Exception as e:
@@ -234,16 +217,46 @@ def guardar_errores_en_txt(errores):
 def enviar_correo_electronico(mensaje):
     subject = 'Error en la aplicación'
     message = mensaje
-    from_email = 'quilesxasterin8@gmail.com'
-    recipient_list = ['quilesxasterin8@gmail.com']
+    from_email = 'notificaciones@riesgos365.com'
+    recipient_list = ['contacto@omenlaceglobal.co']
 
     send_mail(subject, message, from_email, recipient_list)
 
+def procesar_dataframes(df, df_gen):
+    try:
+      
+
+        ciudades_cliente = df['CIUDAD'].unique()
+        df['Concatenado'] = df['DEPARTAMENTO'] + '-' + df['CIUDAD']
+        print(df[df.duplicated('Concatenado')])
+        # Ajustar la columna de mapeo según la estructura de df_gen
+        mapping = df_gen.set_index('municipio')['departamento']
+
+        # Asignar los valores correspondientes a la columna 'SinCorr_Ciudad' en df
+        df['SinCorr_Ciudad'] = df['CIUDAD'].replace(mapping, inplace=False)
+
+
+        # Identificación de correspondencia
+        def marca_correspondencia(row, df_gen):
+            match = df_gen[(df_gen['municipio'] == row['CIUDAD']) & (df_gen['departamento'] == row['DEPARTAMENTO'])]
+            return 0 if not match.empty else 1
+
+        df['SinCorrespondencia'] = df.apply(marca_correspondencia, args=(df_gen,), axis=1)
+
+
+        return df
+
+    except Exception as e:
+        # Manejar excepciones según tus necesidades
+        print(f"Error al procesar los DataFrames: {str(e)}")
+        return None  # Otra acción o retorno que necesites en caso de error
+
+
+
+
 
 # df_gen = pd.read_excel('D:/descargas/GENERALES.xlsx')
-
 # df=pd.read_excel('D:/descargas/CLIENTES_.xlsx')
-
-# limpiar_dataframe(df, df_gen)
-
-# df.to_excel('fin.xlsx', index=False)
+# df_limp=limpiar_dataframe(df, df_gen)
+# print(type(df_limp))
+# df_limp.to_excel('fin.xlsx', index=False)
