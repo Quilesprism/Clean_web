@@ -93,8 +93,8 @@ def guardar_alarmasP(df):
     # Adjuntar el gráfico y el archivo al correo
     subject = 'Archivo de Alarmas'
     mensaje = 'Adjunto encontrarás el gráfico y el archivo de las alarmas.'
-    from_email = 'quilesxasterin8@gmail.com'
-    recipient_list = ['quilesxasterin8@gmail.com']
+    from_email = 'notificaciones@riesgos365.com'
+    recipient_list = ['contacto@omenlaceglobal.co']
     email = EmailMessage(subject, mensaje, from_email, recipient_list)
 
     # Adjuntar el gráfico al correo

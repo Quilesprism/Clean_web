@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'clean', 
-    'dates'
+    'dates',
 ]
 
 MIDDLEWARE = [
@@ -138,8 +138,14 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST="smtp.googlemail.com"
+EMAIL_HOST="smtp.mailgun.org"
 EMAIL_USE_TLS=True
 EMAIL_PORT=587
-EMAIL_HOST_USER="quilesxasterin8@gmail.com"
-EMAIL_HOST_PASSWORD="pbqg ugom juyj qmzg"
+EMAIL_HOST_USER="notificaciones@riesgos365.com"
+EMAIL_HOST_PASSWORD="aT4z7wm9SU6ykGR"
+# EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST="smtp.gmail.com"
+# EMAIL_USE_TLS=True
+# EMAIL_PORT=587
+# EMAIL_HOST_USER="quilesxasterin8@gmail.com"
+# EMAIL_HOST_PASSWORD="sbra mblk lfpg wscm"
