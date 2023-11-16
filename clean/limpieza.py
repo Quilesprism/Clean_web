@@ -85,19 +85,6 @@ def limpiar_dataframe(df, df_gen):
         # Aplica la función a la columna 'No. DOCUMENTO DE IDENTIDAD' y asigna los resultados a la columna 'TIPO PERSONA'
         df['TIPO PERSONA'] = df['No. DOCUMENTO DE IDENTIDAD'].apply(lambda x: x if x in ['NATURAL', 'JURIDICA'] else determinar_tipo_persona(x))
         df['MEDIO PAGO'] = df['MEDIO PAGO'].apply(lambda x: 'TRANSFERENCIA' if pd.isna(x) or (x != 'EFECTIVO' and x.strip().upper() != 'EFECTIVO') else 'EFECTIVO')
-    
-        # #Creación de columnas 'Concatenado' en df y df_gen
-        # df['Concatenado'] = df['DEPARTAMENTO'] + '-' + df['CIUDAD']
-        # df_gen['Concatenado'] = df_gen['Departamento'] + '-' + df_gen['Municipio']
-        # ciudades_cliente = df['CIUDAD'].unique()
-        # city_dept_mapping = dict(zip(df_gen['Municipio'], df_gen['Departamento']))
-        # df['SinCorr_Ciudad'] = df['CIUDAD'].map(city_dept_mapping)
-        # df['SinCorrespondencia'] = df.apply(marca_correspondencia, args=(df_gen,), axis=1)
-        # for ciudad in ciudades_cliente:
-        #     departamento_correspondiente = df_gen[df_gen['Municipio'] == ciudad]['Departamento'].values
-        #     if len(departamento_correspondiente) > 0:
-        #         df.loc[df['CIUDAD'] == ciudad, 'SinCorr_Ciudad'] = departamento_correspondiente[0]
-        # df['SinCorrespondencia'] = df['Concatenado'].apply(lambda x: 0 if x in df_gen['Concatenado'].values else 1)
         return df
 
     except Exception as e:

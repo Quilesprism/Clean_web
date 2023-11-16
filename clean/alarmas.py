@@ -37,32 +37,32 @@ def guardar_alarmas_y_promedio(df):
     plt.pie(counts, labels=labels, autopct='%1.1f%%', startangle=90)
     plt.title('Distribución de Alarmas')
     plt.axis('equal') 
+    carpeta = 'alarmas'
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
     carpeta_graficas = 'graficas'
     if not os.path.exists(carpeta_graficas):
         os.makedirs(carpeta_graficas)
-
     ruta_grafica = os.path.join(carpeta_graficas, 'Distribucion_Alarmas.png')
     plt.savefig(ruta_grafica)
     plt.close()
-
     subject = 'Archivo de Alarmas'
-    mensaje = 'Adjunto encontrarás el gráfico de las alarmas.'
+    mensaje = 'Adjunto encontrarás el gráfico y el archivo de las alarmas.'
     from_email = 'notificaciones@riesgos365.com'
     recipient_list = ['contacto@omenlaceglobal.co']
+    # from_email = 'quilesxasterin8@gmail.com'
+    # recipient_list = ['quilesxasterin8@gmail.com']
     email = EmailMessage(subject, mensaje, from_email, recipient_list)
     with open(ruta_grafica, 'rb') as file:
         email.attach('Distribucion_Alarmas.png', file.read(), 'image/png')
-    email.send()
     fecha_actual = timezone.now()
     nombre_archivo = f'Alarmas_{fecha_actual.strftime("%Y%m%d%H%M%S")}.xlsx'
-    if not os.path.exists(carpeta):
-        os.makedirs(carpeta) 
     ruta_completa = os.path.join(carpeta, nombre_archivo)
     df_filtrado.to_excel(ruta_completa, index=False)
-    mensaje='Archivo de alarmas'
-    enviar_correo_electronico(mensaje, ruta_completa)
+    with open(ruta_completa, 'rb') as file:
+        email.attach(nombre_archivo, file.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    email.send()
     return nombre_archivo
-
 
 
 def guardar_alarmasP(df):
@@ -74,32 +74,49 @@ def guardar_alarmasP(df):
     columnas_deseadas = ['No. DOCUMENTO DE IDENTIDAD', 'NOMBRE', 'VALOR DE LA TRANSACCION', 'MEDIO PAGO', 'TIPO PERSONA (natural/jurídica)', 'ALARMAS']
     df_filtrado = df[df['ALARMAS'].isin(['INUSUAL', 'SOSPECHOSA'])]
     df_filtrado = df_filtrado[columnas_deseadas]
-    counts = df['ALARMAS'].value_counts()
+    counts = df_filtrado['ALARMAS'].value_counts()
     labels = counts.index
     plt.pie(counts, labels=labels, autopct='%1.1f%%', startangle=90)
     plt.title('Distribución de Alarmas')
     plt.axis('equal')
-    buf = io.BytesIO()  
+
+    # Guardar el gráfico en un buffer
+    buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
+
+    # Codificar el gráfico en base64
     string = base64.b64encode(buf.read())
     uri = urllib.parse.quote(string)
     context = {'imgdata': uri}
+
+    # Adjuntar el gráfico y el archivo al correo
     subject = 'Archivo de Alarmas'
-    mensaje = 'Adjunto encontrarás el gráfico de las alarmas.'
+    mensaje = 'Adjunto encontrarás el gráfico y el archivo de las alarmas.'
     from_email = 'quilesxasterin8@gmail.com'
     recipient_list = ['quilesxasterin8@gmail.com']
     email = EmailMessage(subject, mensaje, from_email, recipient_list)
+
+    # Adjuntar el gráfico al correo
     email.attach('Distribucion_Alarmas.png', buf.getvalue(), 'image/png')
-    email.send()
+
+    # Guardar el archivo de alarmas en la carpeta de archivos
     fecha_actual = timezone.now()
     carpeta = 'alarmas'
     nombre_archivo = f'Alarmas_{fecha_actual.strftime("%Y%m%d%H%M%S")}.xlsx'
-    if not os.path.exists(carpeta):
-        os.makedirs(carpeta)
     ruta_completa = os.path.join(carpeta, nombre_archivo)
     df_filtrado.to_excel(ruta_completa, index=False)
-    plt.close() 
+
+    # Adjuntar el archivo al correo
+    with open(ruta_completa, 'rb') as file:
+        email.attach(nombre_archivo, file.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    # Enviar el correo electrónico
+    email.send()
+
+    # Cerrar el gráfico
+    plt.close()
+
     return nombre_archivo
 
 
