@@ -6,7 +6,10 @@
 <p>
 Antes de ejecutar el proyecto se debe crear la base de datos en mysql que tiene por nombre riesgos365. Despues, 
   se deben ejecutar los siguientes comandos:
-- python manage.py makemigrations
-- python manage.py migrate
-- python manage.py runserver  
 </p>
+<li>
+  <lu>python manage.py makemigrations</lu>
+  <lu>python manage.py migrate</lu>
+  <lu>python manage.py runserver</lu>  
+  
+</li>
