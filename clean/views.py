@@ -1,12 +1,14 @@
+import io
 from django.shortcuts import render
 import pandas as pd
-from clean.models import Clientes, Proveedores, Generales
+from clean import segmentacion
+from clean.models import CIIU, Clientes, Jurisdiccion, Proveedores
 from . import limpieza
 import os
 from django.utils import timezone
 from datetime import datetime
 from django.contrib import messages 
-from .guardarbd import guardarbd_proveedores, guardarCliente, cargar
+from .guardarbd import cargar_ciiu, cargar_jurisdiccion, guardarbd_proveedores, guardarCliente
 from .alarmas import guardar_alarmas_y_promedio, guardar_alarmasP
 
 
@@ -51,20 +53,29 @@ def procesar_cliente(request):
     try:
 
         archivo = request.FILES.get('archivo')
-        df = pd.read_excel(archivo)  
+        df_csv = pd.read_excel(archivo)
+        csv_buffer = io.StringIO()
+        df_csv.to_csv(csv_buffer, index=False)
+        csv_buffer.seek(0)
+        df = pd.read_csv(csv_buffer) 
         columnas_archivo = df.columns.tolist()
         mismo_orden = columnas_requeridas == columnas_archivo
         todas_las_columnas_presentes = set(columnas_requeridas).issubset(columnas_archivo)
         if mismo_orden and todas_las_columnas_presentes:
-                datos_generales = Generales.objects.all()
+                datos_generales = Jurisdiccion.objects.all()
                 data = list(datos_generales.values())
                 df_gen = pd.DataFrame(data)
                 print(df_gen.head())
                 df_limpiado = limpieza.limpiar_dataframe(df, df_gen)
                 df_final = limpieza.procesar_dataframes(df_limpiado, df_gen)
                 print(df_final.head())
-                nombre_alarmas = guardar_alarmas_y_promedio(df_final)  
-                           
+                nombre_alarmas = guardar_alarmas_y_promedio(df_final)
+                datos_c= CIIU.objects.all()
+                datac=list(datos_c.values())
+                df_gen_c = pd.DataFrame(datac)
+                print(df_gen_c.head())
+                nombre_segmentacion= segmentacion.segmentacion_c(df_limpiado, df_gen_c, df_gen)  
+                print(nombre_segmentacion)           
                 fecha_subida = request.POST.get('fecha')
 
                 if not fecha_subida:
@@ -117,8 +128,9 @@ def procesar_proveedor(request):
     try:
         archivo = request.FILES.get('archivo')
         df = pd.read_excel(archivo)
-        # resultado = cargar('C:/Users/quile/Downloads/GENERALES.xlsx')
-        # if resultado is True:
+        # resultado = cargar_jurisdiccion('C:/Users/quile/Downloads/GENERALES.xlsx')
+        # resultado2= cargar_ciiu('C:/Users/quile/Downloads/GENERALES.xlsx')
+        # if resultado and resultado2 is True:
         #   print("Datos cargados con éxito.")
         # else:
         #     print(f"Error al cargar datos: {resultado}")
@@ -130,7 +142,15 @@ def procesar_proveedor(request):
                     # El archivo cumple con los requisitos
                 df_limpiado = limpieza.limpiar_Proveedor(df)
                 fecha_subida = request.POST.get('fecha')
-                nombre_alarmas = guardar_alarmasP(df_limpiado)                
+                nombre_alarmas = guardar_alarmasP(df_limpiado) 
+                datos_j = Jurisdiccion.objects.all()
+                data = list(datos_j.values())
+                df_gen_j = pd.DataFrame(data)
+                datos_c= CIIU.objects.all()
+                datac=list(datos_c.values())
+                df_gen_c = pd.DataFrame(datac)
+                nombre_segmentacion= segmentacion.segmentacion_c(df_limpiado, df_gen_c, df_gen_j)
+                print(nombre_segmentacion)
                 if not fecha_subida:
                     messages.error(request, 'La fecha ingresada no es válida.')
                     return render(request, 'cargar_archivo.html')

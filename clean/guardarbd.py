@@ -1,4 +1,4 @@
-from .models import Clientes, Generales, Proveedores
+from .models import CIIU, Clientes, Jurisdiccion, Proveedores
 
 from django.db import transaction
 import pandas as pd
@@ -65,22 +65,58 @@ def guardarbd_proveedores(df_limpiado, ano_subida, mes_subida, nombre_archivo, n
     Proveedores.objects.bulk_create(proveedores)
 
 @transaction.atomic
-def cargar(file_path):
+def cargar_jurisdiccion(ruta_excel):
     try:
+        xls = pd.ExcelFile(ruta_excel)
+        jurisdicciones = []
 
-        df = pd.read_excel(file_path)
-        generales=[]
-        for index, row in df.iterrows():
-              instancia_modelo = Generales(
-                departamento=row['Departamento'],
-                 municipio=row['Municipio'],
-                 divipola=row['Divipola'],
-                 categoria=row['Categoria'],
-                 valor_riesgo=row['VALOR-RIESGO']
-            )
-              generales.append(instancia_modelo) 
-        
-        Generales.objects.bulk_create(generales)
+        for hoja_nombre in xls.sheet_names:
+            if hoja_nombre == 'JURISDICCIÓN':
+                df_limpiado = xls.parse(hoja_nombre)
+
+                for index, row in df_limpiado.iterrows():
+                    jurisdiccion = Jurisdiccion(
+                        departamento=row['Departamento'],
+                        municipio=row['Municipio'],
+                        divipola=row['Divipola'],
+                        categoria=row['Categoria'],
+                        valor_riesgo=row['VALOR-RIESGO'],
+                     
+                    )
+                    jurisdicciones.append(jurisdiccion)
+
+                Jurisdiccion.objects.bulk_create(jurisdicciones)
+
         return True
     except Exception as e:
-        return str(e)
+        print(f"Error al cargar datos de Jurisdiccion: {e}")
+        return False
+
+@transaction.atomic
+def cargar_ciiu(ruta_excel):
+    try:
+        xls = pd.ExcelFile(ruta_excel)
+        ciius = []
+
+        for hoja_nombre in xls.sheet_names:
+            if hoja_nombre == 'CIIU':
+                df_limpiado = xls.parse(hoja_nombre)
+
+                for index, row in df_limpiado.iterrows():
+                    ciiu = CIIU(
+                        cod_ciiu=row['Cod_Ciiu'],
+                        seccion=row['Seccion'],
+                        division=row['Division'],
+                        grupo=row['Grupo'],
+                        descripcion=row['Descripcion'],
+                        valor_riesgo=row['VALOR- RIESGO'],
+                        
+                    )
+                    ciius.append(ciiu)
+
+                CIIU.objects.bulk_create(ciius)
+
+        return True
+    except Exception as e:
+        print(f"Error al cargar datos de CIIU: {e}")
+        return False

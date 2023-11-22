@@ -61,17 +61,26 @@ class Proveedores(models.Model):
         verbose_name = "P_limpio"
         verbose_name_plural = "P_Limpios"
 
-class Generales (models.Model):
+class Jurisdiccion(models.Model):
     departamento = models.CharField(max_length=255)
-    municipio= models.CharField(max_length=255)
-    divipola= models.CharField(max_length=255)
-    categoria= models.CharField(max_length=255)
-    valor_riesgo= models.IntegerField(blank=True, null=True)
-    
-    class Meta:
-        verbose_name = "general"
-        verbose_name_plural = "generales"
+    municipio = models.CharField(max_length=255)
+    divipola = models.CharField(max_length=255)
+    categoria = models.CharField(max_length=255)
+    valor_riesgo = models.IntegerField()
 
+    def __str__(self):
+        return f"Jurisdiccion - {self.departamento} - {self.municipio}"
+    
+class CIIU(models.Model):
+    cod_ciiu = models.CharField(max_length=255)
+    seccion = models.CharField(max_length=255)
+    division = models.CharField(max_length=255)
+    grupo = models.CharField(max_length=255)
+    descripcion = models.CharField(max_length=255)
+    valor_riesgo = models.IntegerField()
+
+    def __str__(self):
+        return f"CIIU - {self.cod_ciiu} - {self.descripcion}"
 
 # class Usuaio():
 #     id_empresa

@@ -8,14 +8,6 @@ import urllib.parse
 from django.core.mail import EmailMessage
 from django.utils import timezone
 
-def enviar_correo_electronico(mensaje, archivo_adjunto):
-    subject = 'Archivo de Alarmas'
-    from_email = 'quilesxasterin8@gmail.com'
-    recipient_list = ['quilesxasterin8@gmail.com']
-    email = EmailMessage(subject, mensaje, from_email, recipient_list)
-    with open(archivo_adjunto, 'rb') as file:
-        email.attach(os.path.basename(archivo_adjunto), file.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    email.send()
 
 def guardar_alarmas_y_promedio(df):
     # Calcular el promedio del VALOR DE LA TRANSACCION por No. DOCUMENTO DE IDENTIDAD
@@ -47,12 +39,23 @@ def guardar_alarmas_y_promedio(df):
     plt.savefig(ruta_grafica)
     plt.close()
     subject = 'Archivo de Alarmas'
-    mensaje = 'Adjunto encontrarás el gráfico y el archivo de las alarmas.'
-    from_email = 'notificaciones@riesgos365.com'
-    recipient_list = ['contacto@omenlaceglobal.co']
-    # from_email = 'quilesxasterin8@gmail.com'
-    # recipient_list = ['quilesxasterin8@gmail.com']
-    email = EmailMessage(subject, mensaje, from_email, recipient_list)
+    body = '''
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 20px;">
+            <h1 style="color: #333333;">Archivo de Alarmas</h1>
+            <p style="color: #555555;">Estimado/a [Nombre del destinatario],</p>
+            <p style="color: #555555;">Adjunto encontrarás el gráfico y el archivo de las alarmas. ¡Espero que encuentres la información útil!</p>
+            <p style="color: #555555;">Si tienes alguna pregunta o necesitas más detalles, no dudes en ponerte en contacto conmigo.</p>
+            <p style="color: #555555;">Saludos cordiales,<br>[Tu Nombre]</p>
+        </body>
+        </html>
+        '''
+    # from_email = 'notificaciones@riesgos365.com'
+    # recipient_list = ['contacto@omenlaceglobal.co']
+    from_email = 'quilesxasterin8@gmail.com'
+    recipient_list = ['quilesxasterin8@gmail.com']
+    email = EmailMessage(subject, body, from_email, recipient_list)
     with open(ruta_grafica, 'rb') as file:
         email.attach('Distribucion_Alarmas.png', file.read(), 'image/png')
     fecha_actual = timezone.now()
@@ -93,8 +96,10 @@ def guardar_alarmasP(df):
     # Adjuntar el gráfico y el archivo al correo
     subject = 'Archivo de Alarmas'
     mensaje = 'Adjunto encontrarás el gráfico y el archivo de las alarmas.'
-    from_email = 'notificaciones@riesgos365.com'
-    recipient_list = ['contacto@omenlaceglobal.co']
+    # from_email = 'notificaciones@riesgos365.com'
+    # recipient_list = ['contacto@omenlaceglobal.co']
+    from_email = 'quilesxasterin8@gmail.com'
+    recipient_list = ['quilesxasterin8@gmail.com']
     email = EmailMessage(subject, mensaje, from_email, recipient_list)
 
     # Adjuntar el gráfico al correo
@@ -103,6 +108,8 @@ def guardar_alarmasP(df):
     # Guardar el archivo de alarmas en la carpeta de archivos
     fecha_actual = timezone.now()
     carpeta = 'alarmas'
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
     nombre_archivo = f'Alarmas_{fecha_actual.strftime("%Y%m%d%H%M%S")}.xlsx'
     ruta_completa = os.path.join(carpeta, nombre_archivo)
     df_filtrado.to_excel(ruta_completa, index=False)
